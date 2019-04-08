@@ -1,4 +1,6 @@
 import numpy as np
+import Kolmogorov as kolmog
+import matplotlib.pyplot as plt
 
 '''
 a1	Temperature of patient { 35C-42C }	
@@ -40,8 +42,29 @@ for line in data_file:
 # print(results)
 results_np = np.array(results)
 #print(results_np)
-for group in groups:
-    print(group)
+#for group in groups:
+#    print(group)
+
+print(groups[0])
+a100 = results_np[:,0]
+a200 = results_np[:,1]
+a300 = results_np[:,2]
+a400 = results_np[:,3]
+a500 = results_np[:,4]
+a600 = results_np[:,5]
+ys = kolmog.distribution_fun(a100)
+print(ys)
+
+plt.subplot(121)
+plt.plot(a100, 'r*')
+plt.ylabel("Sample value")
+plt.xlabel("Sample no")
+plt.subplot(122)
+plt.plot(ys, 'g*')
+plt.ylabel("Distribution fun")
+plt.xlabel("Sample no")
+plt.show()
+
 '''
 a1 = results_np[:,0]
 a2 = results_np[:,1]
