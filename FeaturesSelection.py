@@ -20,7 +20,9 @@ groups = [[], [], [], []]  # groups of results: 00, 01, 10, 11
 results = []
 
 features = []
+feature_names = ["temperature", "lumber pain", "urine pushing", "micturition pains", "burning"]
 labels = []
+label_names = ["healthy", "nephritis", "inflammation", "nephritis and inflammation"]
 
 for line in data_file:
     no_nl_line = line.rstrip("\n\r")  # remove new line sign
@@ -40,51 +42,13 @@ for line in data_file:
         label = 2   # only inflammation
     else:
         label = 3   # both nephritis and inflammation
+
     groups[label].append(result)
     labels.append(label)
 
 
 results_np = np.array(results)  # list to np.array
+print(results_np)
 
 
-'''
-def feature_distribution(xs, feature_no, group_no):
-    ys = kolmog.distribution_fun(xs)
-    plt.subplot(121)
-    plt.title("Feature {} in group {}".format(feature_no, group_no))
-    plt.plot(xs, 'r*')
-    plt.ylabel("Sample value")
-    plt.xlabel("Sample no")
-    plt.subplot(122)
-    plt.plot(ys, 'g*')
-    plt.ylabel("Distribution fun")
-    plt.xlabel("Sample no")
-    plt.show()
 
-
-#print(groups[0])
-a100 = results_np[:, 0]
-a200 = results_np[:, 1]
-a300 = results_np[:, 2]
-a400 = results_np[:, 3]
-a500 = results_np[:, 4]
-a600 = results_np[:, 5]
-
-
-feature_distribution(a100, 0, 0)
-feature_distribution(a200, 1, 0)
-feature_distribution(a300, 2, 0)
-feature_distribution(a400, 3, 0)
-feature_distribution(a500, 4, 0)
-
-
-a1 = results_np[:,0]
-a2 = results_np[:,1]
-a3 = results_np[:,2]
-a4 = results_np[:,3]
-a5 = results_np[:,4]
-a6 = results_np[:,5]
-d1 = results_np[:,6]
-d2 = results_np[:,7]
-'''
-# TODO divide results_np into submatricies according to one of 4 illnesses groups
