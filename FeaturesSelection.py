@@ -29,7 +29,7 @@ groups = [[], [], [], []]  # groups of results: 00, 01, 10, 11
 results = []
 
 features = []
-feature_names = ["temperature", "lumber pain", "urine pushing", "micturition pains", "burning"]
+feature_names = ["temperature", 'nausea', "lumber pain", "urine pushing", "micturition pains", "burning"]
 labels = []
 label_names = ("healthy", "nephritis", "inflammation", "nephritis and inflammation")
 
@@ -37,7 +37,7 @@ for line in data_file:
     no_nl_line = line.rstrip("\n\r")  # remove new line sign
     list_line = no_nl_line.split(";")  # split line into features
     result = [float(i) for i in list_line]  # save line values as floats
-
+   # result[0] = (result[0] - 35) / 6    # normalization of temperature
     results.append(result)  # add line to the results
     features.append(np.array(result[:(-2)]))  # features data
 
@@ -80,13 +80,15 @@ plt.show()
 
 #   Build the NN model
 model = keras.Sequential([
-    keras.layers.Dense(5, activation=tf.nn.relu),
+    keras.layers.Dense(10, activation='relu', input_shape=(6, )),
+    keras.layers.Dense(10, activation=tf.nn.relu),
     keras.layers.Dense(4, activation=tf.nn.softmax)
 ])
 
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
+              metrics=['accuracy'],
+              validation_data=(test, test_labels))
 
 model.fit(train, train_labels, epochs=5)
 
