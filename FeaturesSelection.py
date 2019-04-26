@@ -37,7 +37,7 @@ for line in data_file:
     no_nl_line = line.rstrip("\n\r")  # remove new line sign
     list_line = no_nl_line.split(";")  # split line into features
     result = [float(i) for i in list_line]  # save line values as floats
-   # result[0] = (result[0] - 35) / 6    # normalization of temperature
+    result[0] = (result[0] - 35) / 6    # normalization of temperature
     results.append(result)  # add line to the results
     features.append(np.array(result[:(-2)]))  # features data
 
@@ -87,9 +87,11 @@ model = keras.Sequential([
 
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'],
-              validation_data=(test, test_labels))
+              metrics=['accuracy'])
 
-model.fit(train, train_labels, epochs=5)
+model.fit(train, train_labels, epochs=30)
+
+print("Evaluation")
+model.evaluate(test, test_labels)
 
 
