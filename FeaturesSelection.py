@@ -1,7 +1,8 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 import Kolmogorov as kolmog
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import seaborn as sns # for data visualisation
 
 '''
 a1	Temperature of patient { 35C-42C }	
@@ -23,7 +24,7 @@ results = []
 features = []
 feature_names = ["temperature", "lumber pain", "urine pushing", "micturition pains", "burning"]
 labels = []
-label_names = ["healthy", "nephritis", "inflammation", "nephritis and inflammation"]
+label_names = ("healthy", "nephritis", "inflammation", "nephritis and inflammation")
 
 for line in data_file:
     no_nl_line = line.rstrip("\n\r")  # remove new line sign
@@ -53,6 +54,19 @@ train, test, train_labels, test_labels = train_test_split(features,
                                                           labels,
                                                           test_size=0.33,
                                                           random_state=42)
+
+labels_occurrence = [labels.count(i) for i in range(len(label_names))]
+y_pos = np.arange(len(label_names))
+
+# Plot diseases occurrence
+plt.bar(y_pos, labels_occurrence, align='center', alpha=0.5)
+plt.xticks(y_pos, label_names)
+plt.ylabel('Occurrence')
+plt.title('Occurrence of diseases')
+plt.show()
+
+#   TODO normalize temperatures
+
 
 
 
