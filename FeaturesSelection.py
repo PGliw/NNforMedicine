@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.model_selection import train_test_split
 import Kolmogorov as kolmog
 import matplotlib.pyplot as plt
 
@@ -47,8 +48,11 @@ for line in data_file:
     labels.append(label)
 
 
-results_np = np.array(results)  # list to np.array
-print(results_np)
+# Split data into training and test sets
+train, test, train_labels, test_labels = train_test_split(features,
+                                                          labels,
+                                                          test_size=0.33,
+                                                          random_state=42)
 
 
 
