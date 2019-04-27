@@ -82,11 +82,11 @@ plt.show()
 '''
 #   TODO normalize temperatures
 
+
 #   Build the NN model
-def bulid_model():
+def build_model():
     model = keras.Sequential([
-        keras.layers.Dense(10, activation='relu', input_shape=(6,)),
-    #    keras.layers.Dense(10, activation=tf.nn.relu),
+        keras.layers.Dense(10, activation='relu', input_shape=(6,)),    # eg. 5, 10, 15 neurons
         keras.layers.Dense(4, activation=tf.nn.softmax)
     ])
     model.compile(optimizer='adam',
@@ -95,20 +95,34 @@ def bulid_model():
     return model
 
 
-#   model.fit(train, train_labels, epochs=30)
+def build_model_n(neurons_no):
+    model = keras.Sequential([
+        keras.layers.Dense(neurons_no, activation='relu', input_shape=(6,)),    # eg. 5, 10, 15 neurons
+        keras.layers.Dense(4, activation=tf.nn.softmax)
+    ])
+    model.compile(optimizer='adam',
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['accuracy'])
+    return model
 
+
+neurons_numbers = [5, 10, 15]
+build_model_funs = []
+for neurons_no in neurons_numbers:
+    build_model_funs.append(lambda: build_model_n(neurons_no))
+
+#   model.fit(train, train_labels, epochs=30)
 #   print("Evaluation")
 #   model.evaluate(test, test_labels)
 
 # 2 folds cross validation
 seed = 3
 kfold = KFold(n_splits=2, shuffle=True, random_state=seed)
-estimator = KerasClassifier(build_fn=bulid_model, epochs=60, batch_size=5, verbose=0)   # object implementing fit
+estimator = KerasClassifier(build_fn=build_model_funs[0], epochs=60, batch_size=5, verbose=0)   # object implementing fit
 list_of_scores = []
 for i in range(5):
     scores = cross_val_score(estimator, train, train_labels, cv=kfold)
-    list_of_scores.append(scores)
+    list_of_scores.append(scores[0])
 
 print(list_of_scores)
 #print("Baseline: %.2f%% (%.2f%%)" % (evals.mean()*100, evals.std()*100))
-# TODO repeat 2cv 5 times
