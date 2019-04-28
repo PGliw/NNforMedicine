@@ -2,7 +2,8 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from sklearn.model_selection import train_test_split
 import Kolmogorov as kolmog
-import matplotlib.pyplot as plt;
+import matplotlib.pyplot as plt
+import csv
 
 plt.rcdefaults()
 import seaborn as sns  # for data visualisation
@@ -83,7 +84,7 @@ plt.show()
 
 def build_model_n(neurons_no):
     model = keras.Sequential([
-        keras.layers.Dense(neurons_no, activation='relu', input_shape=(6,)),  # eg. 5, 10, 15 neurons
+        keras.layers.Dense(neurons_no, activation='relu', input_shape=[6]),  # eg. 5, 10, 15 neurons
         keras.layers.Dense(4, activation=tf.nn.softmax)
     ])
     model.compile(optimizer='adam',
@@ -101,15 +102,23 @@ for neurons_no in neurons_numbers:
 def learning_history(neurons_numbers):
     """
     :param neurons_numbers: number of neurons in the hidden layer
-    :return: plot showing how loss magnitude depends on epochs and neurons number
+    plot showing how loss magnitude depends on epochs and neurons number
+    :return:
     """
-    for neurons_no in neurons_numbers:
+    colors = ['blue', 'green', 'red']
+    for counter, neurons_no in enumerate(neurons_numbers):
         history = build_model_n(neurons_no).fit(train, train_labels, epochs=500)
         plt.title("History of learning for {} neurons in the hidden layer".format(neurons_no))
         plt.xlabel('Epoch Number')
         plt.ylabel("Loss Magnitude")
-        plt.plot(history.history['loss'])
-        plt.show()
+        plt.plot(history.history['loss'], color=colors[counter % len(colors)],
+                 label='{} hidden neurons'.format(neurons_no))
+
+    plt.legend()
+    plt.show()
+
+
+#   learning_history(neurons_numbers)
 
 
 def two_folds_cv(build_model_fun, iterations_no=5):
@@ -124,12 +133,33 @@ def two_folds_cv(build_model_fun, iterations_no=5):
     list_of_scores = []
     for i in range(iterations_no):
         scores = cross_val_score(estimator, train, train_labels, cv=kfold)
-        list_of_scores.append(scores[0])
+        list_of_scores.append(scores[0]*100)    # change to percent
 
-    print(list_of_scores)
+    #   print(list_of_scores)
     return list_of_scores
 
 
-neurons_numbers = [5, 10, 15]
-for neurons_no in neurons_numbers:
-    two_folds_cv(lambda: build_model_n(neurons_no))
+def apply_2cv(neurons_numbers, iterations_no=5):
+    header = ["{} score".format(i) for i in range(5)]
+    header.insert(0, "Neuron_no")
+    header.append("Mean")
+    scores_summary = [header]
+    for neurons_no in neurons_numbers:
+        scores = two_folds_cv(lambda: build_model_n(neurons_no), iterations_no)  # calculate scores in percent
+        scores.append(np.mean(scores))
+        scores.insert(0, neurons_no)
+        scores_summary.append(scores)
+
+    return scores_summary
+
+
+scores_summary = apply_2cv(neurons_numbers)
+print(scores_summary)
+
+
+def save_scores_to_csv(filename, scores_summary):
+    with open(filename, 'w', newline='') as myfile:
+        wr = csv.writer(myfile, delimiter=';')  # polish exel uses semicolons
+        wr.writerows(scores_summary)
+
+save_scores_to_csv("wyniki.csv", scores_summary)
