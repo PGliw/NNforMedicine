@@ -14,3 +14,5 @@ for i in range(5):
         print(lambdas[i](b))
 
 
+for counter, value in enumerate(['c', 'b', 'a'], 10):
+    print(counter, value)
