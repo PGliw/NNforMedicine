@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function
 import numpy as np
 from sklearn.model_selection import train_test_split
-import Kolmogorov as kolmog
 import matplotlib.pyplot as plt
 import csv
 
