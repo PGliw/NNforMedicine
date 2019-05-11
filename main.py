@@ -81,6 +81,60 @@ plt.show()
 '''
 
 
+def plot_histogram(group_data, names_of_features, group_name, is_binary=True):
+    """
+    :param group_data: NxM array containing values of M features for N patients from a given patients group
+    :param names_of_features: Mx1 array containing names for each feature given in group_data
+    :param group_name: name (string) of group which results apply to - ex. 'healthy'
+    :param is_binary: boolean indicating weather the feature is binary (0.0 or 1.0) or continuous (from 0.0 to 1.0)
+    :return:
+    """
+    plt.style.use('seaborn-deep')
+    if is_binary:
+        plt.hist(group_data, bins=[-0.05, 0.05, 0.95, 1.05], label=names_of_features)
+        plt.xticks([0, 1], ["no", "yes"])
+    else:
+        plt.hist(group_data, label=names_of_features)
+        plt.xlim(0, 1)
+    plt.title(group_name)
+    plt.xlabel("Feature value")
+    plt.ylabel('Number of patients')
+    plt.legend(loc='upper right')
+    plt.show()
+
+
+# Plot feature histograms for each of 4 patients groups
+# "healthy", "nephritis", "inflammation", "nephritis and inflammation"
+healthy, nephritis, inflammation, nep_and_inf = np.array(groups[0]), np.array(groups[1]), np.array(groups[2]), np.array(
+    groups[3])
+
+continuous_features_indexes, binary_features_indexes = [0], [1, 2, 3, 4, 5]
+continuous_features_names, binary_features_names = feature_names[0], feature_names[1:5]
+patient_groups = [healthy, nephritis, inflammation, nep_and_inf]
+descriptions = [("Binary features values of a healthy patient (0=no, 1=yes)",
+                 "Continuous features values of a healthy patient"),
+                ("Binary features values of a patient with nephritis(0=no, 1=yes)",
+                 "Continuous features values of a patient with nephritis"),
+                ("Binary features values of a patient with inflammation (0=no, 1=yes)",
+                 "Continuous features values of a patient with inflammation"),
+                ("Binary features values of a patient with nephritis and inflammation(0=no, 1=yes)",
+                 "Continuous features values of a patient with nephritis and inflammation")
+                ]
+
+for patient_group, (description_binary, description_continuous) in zip(patient_groups, descriptions):
+    plot_histogram([patient_group[:, i] for i in binary_features_indexes],
+                   binary_features_names, description_binary, is_binary=True)
+
+    plot_histogram([patient_group[:, i] for i in continuous_features_indexes],
+                   continuous_features_names, description_continuous, is_binary=False)
+
+
+plot_histogram([healthy[:, i] for i in [1, 2, 3, 4, 5]], feature_names[1:5], "Binary features values of a healthy "
+                                                                             "patient (0=no, 1=yes)")
+plot_histogram(healthy[0], feature_names[0], "Continuous features values of a healthy "
+                                             "patient", is_binary=False)
+
+
 def build_model_n(neurons_no):
     model = keras.Sequential([
         keras.layers.Dense(neurons_no, activation='relu', input_shape=[6]),  # eg. 5, 10, 15 neurons
