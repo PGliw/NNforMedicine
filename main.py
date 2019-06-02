@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import csv
+import confusion_matrix
 
 plt.rcdefaults()
 import seaborn as sns  # for data visualisation
@@ -63,10 +64,10 @@ features = np.array(features)
 labels = np.array(labels)
 
 # Split data into training and test sets
-train, test, train_labels, test_labels = train_test_split(features,
-                                                          labels,
-                                                          test_size=0.33,
-                                                          random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(features,
+                                                    labels,
+                                                    test_size=0.33,
+                                                    random_state=42)
 
 # labels_occurrence = [labels.count(i) for i in range(len(label_names))]
 # y_pos = np.arange(len(label_names))
@@ -79,60 +80,6 @@ plt.ylabel('Occurrence')
 plt.title('Occurrence of diseases')
 plt.show()
 '''
-
-
-def plot_histogram(group_data, names_of_features, group_name, is_binary=True):
-    """
-    :param group_data: NxM array containing values of M features for N patients from a given patients group
-    :param names_of_features: Mx1 array containing names for each feature given in group_data
-    :param group_name: name (string) of group which results apply to - ex. 'healthy'
-    :param is_binary: boolean indicating weather the feature is binary (0.0 or 1.0) or continuous (from 0.0 to 1.0)
-    :return:
-    """
-    plt.style.use('seaborn-deep')
-    if is_binary:
-        plt.hist(group_data, bins=[-0.05, 0.05, 0.95, 1.05], label=names_of_features)
-        plt.xticks([0, 1], ["no", "yes"])
-    else:
-        plt.hist(group_data, label=names_of_features)
-        plt.xlim(0, 1)
-    plt.title(group_name)
-    plt.xlabel("Feature value")
-    plt.ylabel('Number of patients')
-    plt.legend(loc='upper right')
-    plt.show()
-
-
-# Plot feature histograms for each of 4 patients groups
-# "healthy", "nephritis", "inflammation", "nephritis and inflammation"
-healthy, nephritis, inflammation, nep_and_inf = np.array(groups[0]), np.array(groups[1]), np.array(groups[2]), np.array(
-    groups[3])
-
-continuous_features_indexes, binary_features_indexes = [0], [1, 2, 3, 4, 5]
-continuous_features_names, binary_features_names = feature_names[0], feature_names[1:5]
-patient_groups = [healthy, nephritis, inflammation, nep_and_inf]
-descriptions = [("Binary features values of a healthy patient (0=no, 1=yes)",
-                 "Continuous features values of a healthy patient"),
-                ("Binary features values of a patient with nephritis(0=no, 1=yes)",
-                 "Continuous features values of a patient with nephritis"),
-                ("Binary features values of a patient with inflammation (0=no, 1=yes)",
-                 "Continuous features values of a patient with inflammation"),
-                ("Binary features values of a patient with nephritis and inflammation(0=no, 1=yes)",
-                 "Continuous features values of a patient with nephritis and inflammation")
-                ]
-
-for patient_group, (description_binary, description_continuous) in zip(patient_groups, descriptions):
-    plot_histogram([patient_group[:, i] for i in binary_features_indexes],
-                   binary_features_names, description_binary, is_binary=True)
-
-    plot_histogram([patient_group[:, i] for i in continuous_features_indexes],
-                   continuous_features_names, description_continuous, is_binary=False)
-
-
-plot_histogram([healthy[:, i] for i in [1, 2, 3, 4, 5]], feature_names[1:5], "Binary features values of a healthy "
-                                                                             "patient (0=no, 1=yes)")
-plot_histogram(healthy[0], feature_names[0], "Continuous features values of a healthy "
-                                             "patient", is_binary=False)
 
 
 def build_model_n(neurons_no):
@@ -160,7 +107,7 @@ def learning_history(neurons_numbers):
     """
     colors = ['blue', 'green', 'red']
     for counter, neurons_no in enumerate(neurons_numbers):
-        history = build_model_n(neurons_no).fit(train, train_labels, epochs=500)
+        history = build_model_n(neurons_no).fit(x_train, y_train, epochs=500)
         plt.title("History of learning for {} neurons in the hidden layer".format(neurons_no))
         plt.xlabel('Epoch Number')
         plt.ylabel("Loss Magnitude")
@@ -173,7 +120,6 @@ def learning_history(neurons_numbers):
 
 #   learning_history(neurons_numbers)
 
-
 def two_folds_cv(build_model_fun, iterations_no=5):
     """
     :param build_model_fun: function that returns compiled Keras model
@@ -185,7 +131,7 @@ def two_folds_cv(build_model_fun, iterations_no=5):
     estimator = KerasClassifier(build_fn=build_model_fun, epochs=60, batch_size=5, verbose=0)  # object implementing fit
     list_of_scores = []
     for i in range(iterations_no):
-        scores = cross_val_score(estimator, train, train_labels, cv=kfold)
+        scores = cross_val_score(estimator, x_train, y_train, cv=kfold)
         list_of_scores.append(scores[0]*100)    # change to percent
 
     #   print(list_of_scores)
@@ -206,8 +152,8 @@ def apply_2cv(neurons_numbers, iterations_no=5):
     return scores_summary
 
 
-scores_summary = apply_2cv(neurons_numbers)
-print(scores_summary)
+# scores_summary = apply_2cv(neurons_numbers)
+# print(scores_summary)
 
 
 def save_scores_to_csv(filename, scores_summary):
@@ -215,4 +161,12 @@ def save_scores_to_csv(filename, scores_summary):
         wr = csv.writer(myfile, delimiter=';')  # polish exel uses semicolons
         wr.writerows(scores_summary)
 
-save_scores_to_csv("wyniki.csv", scores_summary)
+# save_scores_to_csv("wyniki.csv", scores_summary)
+
+
+model = build_model_n(10)
+model.fit(x=x_train, y=y_train, epochs=100)
+predictions_matrix = model.predict(x_test)
+y_pred = np.argmax(predictions_matrix, axis=1)
+confusion_matrix.plot_confusion_matrix(y_pred=y_pred.astype(int), y_true=y_test.astype(int), classes=[0, 1, 2, 3])
+plt.show()
