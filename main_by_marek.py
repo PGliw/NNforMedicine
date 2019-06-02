@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import random
 import time
 
 import numpy as np
@@ -227,43 +228,6 @@ def save_scores_to_csv(filename, scores_summary):
 
 # save_scores_to_csv("wyniki1.csv", scores_summary)
 
-'''
-
-def kolmogorov4nth_feature(number_of_feature1, number_of_feature2, number_of_class):
-    feature1_data = []
-    feature2_data = []
-    for i in range(120):
-        if labels[i] == number_of_class:
-            feature1_data.append(features[i][number_of_feature1])
-            feature2_data.append(features[i][number_of_feature2])
-    return ks_2samp(feature1_data, feature2_data).__getitem__(0)
-
-def kolmogorovElimination(treshold):
-    dataSet = list(features)
-    kolmogorov_results = [[[] for x in range(6)] for y in range(6)]
-    for k in range(4):
-        w = 6
-        for j in range(w):
-            for i in range(j, w):
-                if j != i:
-                    print('{}{}{}{}'.format("Kolmogorow for ", feature_names[i], " and ", feature_names[j]))
-                    kolmogorov_results[j][i] = kolmogorov4nth_feature(i, j, k)
-                    if kolmogorov_results[j][i] < treshold:
-                        print(kolmogorov_results[j][i])
-        filename = '{}{}{}'.format("Kolmogorov", k, ".csv")
-        with open(filename, 'w') as myfile:
-            wr = csv.writer(myfile, delimiter=';')
-            wr.writerows(kolmogorov_results)
-        print(['{:30}'.format(item) for item in feature_names])
-        print(kolmogorov_results)
-        # print('\n'.join([''.join(['{:30}'.format(item) for item in row]) for row in kolmogorov_results]))
-        print("\n")
-
-
-kolmogorovElimination(0.01)
-'''
-
-
 class RankingMember:
     """
     Class made to preserve association between feature name and value during sorting
@@ -283,7 +247,7 @@ class RankingMember:
 ranking = []
 
 
-def kolmogorovFeatureRankingByMeanValue(features, label_names, feature_names):
+def kolmogorov_feature_ranking_by_mean_value(features, feature_names):
     for featureIterator in range(6):
         results4singleFeature = []
         for classIterator in range(4):
@@ -307,7 +271,7 @@ def kolmogorovFeatureRankingByMeanValue(features, label_names, feature_names):
     ranking.reverse()
 
 
-kolmogorovFeatureRankingByMeanValue(features, label_names, feature_names)
+kolmogorov_feature_ranking_by_mean_value(features, feature_names)
 
 
 def best_features_extractor(number_of_features):
@@ -322,38 +286,92 @@ def best_features_extractor(number_of_features):
     return features_to_return
 
 
-def two_folds_cv_f(build_model_fun, features_number, iterations_no):
+def two_folds_cv_bym(build_model_fun, features_number, iterations_no, features_data, diagnosis_data):
     """
     :param build_model_fun: function that returns compiled Keras model
+    :param features_number: number of best features used in 2cv
     :param iterations_no: number of iterations of cross validation
+    :param features_data:
+    :param labels:
     :return: list of scores for each iteration
     """
-    kfold = KFold(n_splits=2, shuffle=True, random_state=3)
-    estimator = KerasClassifier(build_fn=build_model_fun, epochs=50, batch_size=5,
-                                verbose=0)  # object implementing fit
+
+    # kfold = KFold(n_splits=2, shuffle=True, random_state=3)
+    """
+    diagnosis_data = []
+    for label in labels:
+        if label == 0:
+            diagnosis_data.append([1, 0, 0, 0])
+        elif label == 1:
+            diagnosis_data.append([0, 1, 0, 0])
+        elif label == 2:
+            diagnosis_data.append([0, 0, 1, 0])
+        elif label == 3:
+            diagnosis_data.append([0, 0, 0, 1])
+            """
+
     list_of_scores = []
     for i in range(iterations_no):
-        features1 = np.array(best_features_extractor(features_number))
-        scores = cross_val_score(estimator, features1, labels, cv=kfold)
-        list_of_scores.append(scores[0] * 100)  # change to percent
+        results = []
+        test_features_set = []
+        learning_features_set = []
+        test_diagnosis_set = []
+        learning_diagnosis_set = []
+
+        for iter in range(0, len(features_data)):
+            if (random.choice([True, False]) and len(learning_features_set) <= len(features_data) / 2) \
+                    or len(test_features_set) == len(features_data) / 2:
+                learning_features_set.append(features_data[iter].copy())
+                learning_diagnosis_set.append(diagnosis_data[iter].copy())
+            else:
+                test_features_set.append(features_data[iter].copy())
+                test_diagnosis_set.append(diagnosis_data[iter].copy())
+        print("Test features set")
+        print(len(features_data))
+        print(len(learning_features_set))
+        print(len(test_features_set))
+        print(len(learning_features_set))
+        print(np.array(test_features_set))
+        print("Test diagnosis set")
+        print(np.array(test_diagnosis_set))
+
+        estimator = KerasClassifier(build_fn=build_model_fun, epochs=50, batch_size=5,
+                                    verbose=0)  # object implementing fit
+        estimator.fit(x=np.array(learning_features_set)[0:1], y=np.array(learning_diagnosis_set)[0:1])#dokumentacje sprawdzic, lista np arrays
+        for j in range(0, len(test_features_set)):
+            results.append(estimator.predict(test_features_set[j]))
+        print(result)
+
     print(list_of_scores)
     return list_of_scores
 
 
-def build_model_nn(neurons_no, feature_no):
+def build_model_bym(neurons_no, feature_no):
+    """
+
+    :param neurons_no: number of neuron in hidden layer
+    :param feature_no: number of inputs
+    :return: Neural network with single hidden layer
+    """
     model = keras.Sequential([
         keras.layers.Dense(neurons_no, activation='relu', input_shape=[feature_no]),  # eg. 5, 10, 15 neurons
         keras.layers.Dense(4, activation=tf.nn.softmax)
     ])
-    model.compile(optimizer='adam',
-                  loss='sparse_categorical_crossentropy',
-                  metrics=['accuracy'])
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     return model
 
 
 def method5x2cv(neurons_number, features_number):
+    """
+
+    :param neurons_number:
+    :param features_number:
+    :return: list of scores acquired by
+    """
     ts1 = time.time()
-    scores = two_folds_cv_f(lambda: build_model_nn(neurons_number, features_number), features_number, iterations_no=5)
+    scores = two_folds_cv_bym(lambda: build_model_bym(neurons_number, features_number), features_number=features_number,
+                              iterations_no=5, features_data=best_features_extractor(features_number),
+                              diagnosis_data=labels)
     ts2 = time.time()
     scores.append(np.mean(scores))
     scores.insert(0, features_number)
@@ -362,11 +380,13 @@ def method5x2cv(neurons_number, features_number):
     return scores_summary
 
 
+method5x2cv(15, 6)
+
+
 def learning_history_with_feature_ranking(neurons_numbers):
     """
     :param neurons_numbers: number of neurons in the hidden layer
     plot showing how loss magnitude depends on epochs and neurons number
-    :return:
     """
     colors = ['blue', 'green', 'red', 'yellow', 'black', 'magenta']
     header = ["{} score".format(i) for i in range(1, 6)]
@@ -390,7 +410,4 @@ def learning_history_with_feature_ranking(neurons_numbers):
     plt.show()"""
     save_scores_to_csv("wyniki_dla_roznej_liczby_cech.csv", scores)
 
-
-learning_history_with_feature_ranking(15)
-
-
+# learning_history_with_feature_ranking(15)
