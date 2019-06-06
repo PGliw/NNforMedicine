@@ -5,6 +5,7 @@ import csv
 from sklearn.model_selection import KFold
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import cross_val_score
+import random
 
 '''
 a1	Temperature of patient { 35C-42C }	
@@ -114,23 +115,15 @@ def two_folds_cv(build_model_fun, xs, ys, iterations_no=5):
     return list_of_scores
 
 
-# scores_summary = apply_2cv(neurons_numbers)
-# print(scores_summary)
-
-
 def save_scores_to_csv(filename, scores_summary):
     with open(filename, 'w', newline='') as myfile:
         wr = csv.writer(myfile, delimiter=';')  # polish exel uses semicolons
         wr.writerows(scores_summary)
 
-# save_scores_to_csv("wyniki.csv", scores_summary)
 
+def divide_set_to_random_parts(xs, ys):
+    xs_and_ys = list(zip(xs, ys))
+    random.shuffle(xs_and_ys)
+    xs_shuffled, y_shuffled = zip(*xs_and_ys)
+    return list(xs_shuffled), list(y_shuffled)
 
-'''
-model = build_model_n(10)
-model.fit(x=x_train, y=y_train, epochs=100)
-predictions_matrix = model.predict(x_test)
-y_pred = np.argmax(predictions_matrix, axis=1)
-confusion_matrix.plot_confusion_matrix(y_pred=y_pred.astype(int), y_true=y_test.astype(int), classes=[0, 1, 2, 3])
-plt.show()
-'''
