@@ -96,7 +96,7 @@ def plot_diseases_occurrence(ys):
     plt.show()
 
 
-def two_folds_cv(build_model_fun, xs, ys, iterations_no=5):
+def two_folds_cv(build_model_fun, xs, ys, iterations_no=5, epochs=60):
     """
     :param build_model_fun: function that returns compiled Keras model
     :param xs: NxD np.array of input data
@@ -106,7 +106,7 @@ def two_folds_cv(build_model_fun, xs, ys, iterations_no=5):
     """
     seed = 3
     kfold = KFold(n_splits=2, shuffle=True, random_state=seed)  # two folds
-    estimator = KerasClassifier(build_fn=build_model_fun, epochs=60, batch_size=5, verbose=0)  # object implementing fit
+    estimator = KerasClassifier(build_fn=build_model_fun, epochs=epochs, batch_size=5, verbose=0)  # object implementing fit
     list_of_scores = []
     for i in range(iterations_no):
         scores = cross_val_score(estimator, xs, ys, cv=kfold)

@@ -8,7 +8,7 @@ from utils import two_folds_cv, save_scores_to_csv, file_to_lists, normalize_tem
 import confusion_matrix
 plt.rcdefaults()
 
-EXPERIMENT_NAME = "exp_neurons_number"
+EXPERIMENT_NAME = "exp_neurons_number.csv"
 
 
 def build_model_n(neurons_no):
