@@ -87,10 +87,10 @@ def proceed_experiment():
     data, xs, ys = file_to_lists()  # read data from the file
     normalize_temps(xs)  # normalize temperatures
     neurons_numbers = [5, 10, 15]
-    # plot_learning_history(neurons_numbers, xs, ys)
+    plot_learning_history(neurons_numbers, xs, ys)
     plot_confusion_matrices(neurons_numbers, xs, ys)
-    # scores_summary = apply_2cv(neurons_numbers, xs, ys)
-    # save_scores(scores_summary)
+    scores_summary = apply_2cv(neurons_numbers, xs, ys)
+    save_scores(scores_summary)
 
 
 proceed_experiment()
