@@ -272,7 +272,7 @@ def kolmogorov_feature_ranking_by_mean_value(features, feature_names):
 
 
 kolmogorov_feature_ranking_by_mean_value(features, feature_names)
-
+print(ranking)
 
 def best_features_extractor(number_of_features):
     print("{} number of features".format(number_of_features))
@@ -319,25 +319,30 @@ def two_folds_cv_bym(build_model_fun, features_number, iterations_no, features_d
         learning_diagnosis_set = []
 
         for iter in range(0, len(features_data)):
-            if (random.choice([True, False]) and len(learning_features_set) <= len(features_data) / 2) \
-                    or len(test_features_set) == len(features_data) / 2:
-                learning_features_set.append(features_data[iter].copy())
-                learning_diagnosis_set.append(diagnosis_data[iter].copy())
+            if (random.choice([True, False]) and len(learning_features_set) <= (len(features_data) / 2)) \
+                    or len(test_features_set) == len(features_data) / 2 or len(learning_features_set) == \
+                    (len(features_data) / 2):
+                learning_features_set.append(np.array(features_data[iter].copy()))
+                learning_diagnosis_set.append(np.array(diagnosis_data[iter].copy()))
             else:
                 test_features_set.append(features_data[iter].copy())
                 test_diagnosis_set.append(diagnosis_data[iter].copy())
-        print("Test features set")
+
         print(len(features_data))
         print(len(learning_features_set))
         print(len(test_features_set))
         print(len(learning_features_set))
-        print(np.array(test_features_set))
+        print("Test features set")
+        print(np.array(learning_features_set))
         print("Test diagnosis set")
-        print(np.array(test_diagnosis_set))
+        print(np.array(learning_diagnosis_set))
+        print(np.array(learning_features_set).shape)
+        print(len(test_features_set) == (len(features_data) / 2))
 
         estimator = KerasClassifier(build_fn=build_model_fun, epochs=50, batch_size=5,
                                     verbose=0)  # object implementing fit
-        estimator.fit(x=np.array(learning_features_set)[0:1], y=np.array(learning_diagnosis_set)[0:1])#dokumentacje sprawdzic, lista np arrays
+        estimator.fit(x=np.array(learning_features_set),
+                      y=np.array(learning_diagnosis_set))  # dokumentacje sprawdzic, lista np arrays
         for j in range(0, len(test_features_set)):
             results.append(estimator.predict(test_features_set[j]))
         print(result)
@@ -380,7 +385,7 @@ def method5x2cv(neurons_number, features_number):
     return scores_summary
 
 
-method5x2cv(15, 6)
+#method5x2cv(15, 6)
 
 
 def learning_history_with_feature_ranking(neurons_numbers):
