@@ -55,7 +55,7 @@ def apply_2cv(activation_funs_with_names_list, xs, ys, iterations_no=5):
     :return: table of scores
     """
     header = ["{} score".format(i) for i in range(5)]
-    header.insert(0, "Optimizer")
+    header.insert(0, "Activation functions")
     header.append("Mean")
     scores_summary = [header]
     for activation_funs, activation_names in activation_funs_with_names_list:
