@@ -11,7 +11,7 @@ ___
 * plan and run experiments to find the best neural-network parameters for this task.
 ___
 ### Dataset:
-You can find the original dataset at XXX.  
+You can find the original dataset [here](http://archive.ics.uci.edu/ml/datasets/Acute+Inflammations?fbclid=IwAR1w8M3Jx9TkRmpxOqvlYsWwc5Ry5wi3ZFjCMjRNSBcSGbT-2moukDC5npw "Original dataset").  
 It was converted to .csv file to before feeding the neural network.  
 Take a look at *diagnosis01dots.csv* file.
 ___
